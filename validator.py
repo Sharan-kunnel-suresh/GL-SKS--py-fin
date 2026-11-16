@@ -34,19 +34,49 @@ def load_airports(path: str) -> set[str]:
 
 
 def validate_row(fields: list[str], airports: set[str]) -> str | None:
-    """Check one CSV row (fields as returned by csv.reader, not yet stripped).
-
-    Return None if the row is valid, otherwise the error code of the
-    FIRST failing check (checks 1-11 in the specification, in order).
-    Does not check for duplicates.
-    """
-    raise NotImplementedError
+    """Return the first validation error for a CSV row, if any."""
+    fields = [field.strip() for field in fields]
+    if len(fields) != 6:#checking the field count, if it is not 6 then return the error code
+        return "WRONG_FIELD_COUNT"
+    if any(not field for field in fields):
+        return "MISSING_FIELD"
+    flight_id, origin, destination, departure_text, arrival_text, price_text = fields
+    if not _FLIGHT_ID.fullmatch(flight_id):
+        return "INVALID_FLIGHT_ID"
+    if not _AIRPORT.fullmatch(origin) or origin not in airports:
+        return "INVALID_ORIGIN"
+    if not _AIRPORT.fullmatch(destination) or destination not in airports:
+        return "INVALID_DESTINATION"
+    if origin == destination:
+        return "SAME_ORIGIN_DESTINATION"
+    departure = _parse_datetime(departure_text)
+    if departure is None:
+        return "INVALID_DEPARTURE"
+    arrival = _parse_datetime(arrival_text)
+    if arrival is None:
+        return "INVALID_ARRIVAL"
+    if arrival <= departure:
+        return "ARRIVAL_NOT_AFTER_DEPARTURE"
+    try:
+        price = float(price_text)
+    except (TypeError, ValueError, OverflowError):
+        return "INVALID_PRICE"
+    if not math.isfinite(price):
+        return "INVALID_PRICE"
+    if price <= 0:
+        return "NON_POSITIVE_PRICE"
+    return None
 
 
 def to_record(fields: list[str]) -> dict:
-    """Turn a valid row into a flight record dictionary.
+    """Convert a valid row into the required flight record."""
+    values = [field.strip() for field in fields]
+    return {
+        "flight_id": values[0],
+        "origin": values[1],
+        "destination": values[2],
+        "departure_datetime": values[3],
+        "arrival_datetime": values[4],
+        "price": float(values[5]),
+    }
 
-    Keys: flight_id, origin, destination, departure_datetime,
-    arrival_datetime (stripped strings) and price (float).
-    """
-    raise NotImplementedError
