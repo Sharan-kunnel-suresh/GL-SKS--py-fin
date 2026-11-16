@@ -18,7 +18,7 @@ from validator import load_airports
 # TODO: fill in your details: plain ASCII, no spaces or underscores.
 STUDENT_ID = "251ADB024"
 FIRST_NAME = "Sharan"
-LAST_NAME = "Kunnel_Suresh"
+LAST_NAME = "Kunnel Suresh"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -48,5 +48,59 @@ def main(argv: list[str] | None = None) -> int:
     logger.setLevel(logging.INFO)
     logger.propagate = False
     handler = None
+    try:
+        if args.j:
+            with open(args.j, "r", encoding="utf-8") as database_file:
+                db = json.load(database_file)
+            if not isinstance(db, list) or any(not isinstance(record, dict) for record in db):
+                raise ValueError("JSON database must be an array of objects")
+        else:
+            log_path = os.path.join(os.path.dirname(os.path.abspath(output_path)), "errors.log")
+            handler = logging.FileHandler(log_path, mode="w", encoding="utf-8")
+            handler.setFormatter(logging.Formatter(
+                "%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+            ))
+            logger.addHandler(handler)
+
+            if args.i:
+                csv_paths = [args.i]
+            else:
+                if not os.path.isdir(args.d):
+                    raise FileNotFoundError(f"folder does not exist: {args.d}")
+                csv_paths = [
+                    os.path.join(args.d, name)
+                    for name in sorted(os.listdir(args.d))
+                    if name.endswith(".csv") and os.path.isfile(os.path.join(args.d, name))
+                ]
+                if not csv_paths:
+                    raise FileNotFoundError(f"no .csv files found in folder: {args.d}")
+            airports = load_airports(args.a)
+            db, errors = parse_files(csv_paths, airports)
+            for error in errors:
+                logger.warning("%s", error)
+            with open(output_path, "w", encoding="utf-8") as database_file:
+                json.dump(db, database_file, ensure_ascii=False, indent=2)
+        if args.q:
+            with open(args.q, "r", encoding="utf-8") as query_file:
+                queries = json.load(query_file)
+            if not isinstance(queries, (dict, list)):
+                raise ValueError("query JSON must be an object or an array")
+            responses = run_queries(db, queries)
+            response_folder = args.r or "."
+            response_name = (
+                f"response_{STUDENT_ID}_{FIRST_NAME}_{LAST_NAME}_"
+                f"{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+            )
+            response_path = os.path.join(response_folder, response_name)
+            with open(response_path, "w", encoding="utf-8") as response_file:
+                json.dump(responses, response_file, ensure_ascii=False, indent=2)
+        return 0
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+    finally:
+        if handler is not None:
+            logger.removeHandler(handler)
+            handler.close()
 if __name__ == "__main__":
     sys.exit(main())
