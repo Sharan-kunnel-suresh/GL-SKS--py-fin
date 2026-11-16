@@ -9,13 +9,28 @@ _AIRPORT = re.compile(r"[A-Z]{3}\Z", re.ASCII)
 _DATETIME = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}\Z", re.ASCII)
 _DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 
-def load_airports(path: str) -> set[str]:
-    """Read an airport list file and return the set of codes.
 
-    One code per line. Strip whitespace; skip blank lines and lines
-    starting with '#'.
-    """
-    raise NotImplementedError
+#extra functions creating to parse datetime and check if it is valid
+def _parse_datetime(value: str) -> datetime | None:
+    if not _DATETIME.fullmatch(value):
+        return None
+    try:
+        parsed = datetime.strptime(value, _DATETIME_FORMAT)
+    except ValueError:
+        return None
+    # strptime accepts some non-zero-padded fields on some Python versions.
+    return parsed if parsed.strftime(_DATETIME_FORMAT) == value else None
+
+def load_airports(path: str) -> set[str]:
+    """Read airport codes, ignoring blank and comment lines."""
+    airports: set[str] = set()
+    with open(path, "r", encoding="utf-8") as airport_file:
+        for line in airport_file:
+            code = line.strip()
+            if code and not code.startswith("#"):
+                airports.add(code)
+    return airports
+    
 
 
 def validate_row(fields: list[str], airports: set[str]) -> str | None:
