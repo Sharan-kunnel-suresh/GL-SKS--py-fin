@@ -1,5 +1,13 @@
 """Row validation: airport list loading, single-row checks, record building."""
 
+import math
+import re
+from datetime import datetime
+
+_FLIGHT_ID = re.compile(r"[A-Za-z0-9]{2,8}\Z", re.ASCII)
+_AIRPORT = re.compile(r"[A-Z]{3}\Z", re.ASCII)
+_DATETIME = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}\Z", re.ASCII)
+_DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 
 def load_airports(path: str) -> set[str]:
     """Read an airport list file and return the set of codes.
