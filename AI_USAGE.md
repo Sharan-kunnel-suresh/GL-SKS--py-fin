@@ -8,12 +8,11 @@ No AI tools were used.
 
 ## Tools used
 
-- Tool and version (e.g. ChatGPT GPT-5, Claude, GitHub Copilot):
+- ChatGPT GPT-6:
 
 ## Conversation links
 
-- Link 1:
-- Link 2:
+- Link 1: https://chatgpt.com/share/6afb0e4c-fbc4-83ed-9e44-b40a0aaa98e2
 
 ## What I used them for
 

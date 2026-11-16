@@ -15,10 +15,10 @@ from csv_loader import parse_files
 from query import run_queries
 from validator import load_airports
 
-# TODO: fill in your details: plain ASCII, no spaces or underscores.
+
 STUDENT_ID = "251ADB024"
 FIRST_NAME = "Sharan"
-LAST_NAME = "Kunnel Suresh"
+LAST_NAME = "KunnelSuresh"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -37,8 +37,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("-o", metavar="FILE", help="database output path (default: db.json)")
     parser.add_argument("-q", metavar="FILE", help="JSON file containing queries")
     parser.add_argument("-r", metavar="FOLDER", help="query response folder (default: current folder)")
-    args = parser.parse_args(argv)
-
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as exc:
+        return int(exc.code)
     if (args.i or args.d) and not args.a:
         parser.error("-a is required with -i or -d")
     if args.j and args.o:
@@ -83,7 +85,11 @@ def main(argv: list[str] | None = None) -> int:
         if args.q:
             with open(args.q, "r", encoding="utf-8") as query_file:
                 queries = json.load(query_file)
-            if not isinstance(queries, (dict, list)):
+            if isinstance(queries, dict):
+                pass
+            elif isinstance(queries, list) and all(isinstance(query, dict) for query in queries):
+                pass
+            else:
                 raise ValueError("query JSON must be an object or an array")
             responses = run_queries(db, queries)
             response_folder = args.r or "."

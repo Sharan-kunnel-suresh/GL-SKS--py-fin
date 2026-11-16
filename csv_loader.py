@@ -2,8 +2,6 @@
 """Reading CSV files into flight records and error messages."""
 import csv
 import os
-
-from numpy import record
 from validator import to_record, validate_row
 def parse_files(paths: list[str], airports: set[str]) -> tuple[list[dict], list[str]]:
     """Process the CSV files in the order given.
@@ -19,7 +17,7 @@ def parse_files(paths: list[str], airports: set[str]) -> tuple[list[dict], list[
     """
     records: list[dict] = []
     errors: list[str] = []
-    seen: set[tuple[str, str, str]] = set()  # (flight_number, departure_date, departure_airport)
+    seen: set[tuple[str, str]] = set()  # (flight_number, departure_date)
     for path in paths:
         with open(path, "r", encoding="utf-8-sig", newline="") as csv_file:
             for line_number, line in enumerate(csv_file, start=1):

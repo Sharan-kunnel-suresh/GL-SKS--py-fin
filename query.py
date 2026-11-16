@@ -2,7 +2,7 @@
 import math
 import re
 from datetime import datetime
-_RECORD_KEYS = {
+_RECORDED_KEYS = {
     "flight_id",
     "origin",
     "destination",
@@ -10,7 +10,7 @@ _RECORD_KEYS = {
     "arrival_datetime",
     "price",
 }
-_ALLOWED_KEYS = _RECORD_KEYS | {"min_price", "sort_by", "order", "limit"}
+_ALLOWED_KEYS = _RECORDED_KEYS | {"min_price", "sort_by", "order", "limit"}
 _DATETIME = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}\Z", re.ASCII)
 
 def _valid_datetime(value: str) -> bool:
@@ -41,7 +41,7 @@ def _is_valid_query(query: object) -> bool:
             return False
     if "sort_by" in query:
         sort_by = query["sort_by"]
-        if not isinstance(sort_by, str) or sort_by not in _RECORD_KEYS:
+        if not isinstance(sort_by, str) or sort_by not in _RECORDED_KEYS:
             return False
     if "order" in query:
         if "sort_by" not in query or query["order"] not in ("asc", "desc"):
