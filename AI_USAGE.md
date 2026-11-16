@@ -33,3 +33,6 @@ No AI tools were used.
    2.help me do this lab. tel me what all things should i implement give me a structure of algorithm. explain what all to do . and the concept behind it
 
 ## What I changed or verified myself
+
+- i coded the parser query functions and loading function . taking help from chatgpt to get overall view of the algorthim. got review code snippets that can be improved
+- Review the generated code and make sure you understand it. Replace the student ID and name placeholders in `flight_parser.py`, add this conversation's share URL, and run the provided public tests before submitting.
